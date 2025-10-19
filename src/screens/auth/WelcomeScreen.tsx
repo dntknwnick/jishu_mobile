@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const { height } = Dimensions.get('window');

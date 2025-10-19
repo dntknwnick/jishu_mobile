@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../context/AuthContext';
 import LinearGradient from 'react-native-linear-gradient';
 import { profileApi } from '../services/apiEndpoints';
