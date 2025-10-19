@@ -73,3 +73,22 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Gradle
+.gradle/
+android/gradle/wrapper/dists/
+
+# Node
+node_modules/
+
+# Build artifacts
+build/
+android/app/build/
+ios/build/
+ios/Pods/
+
+# Misc
+*.iml
+*.log
+*.keystore
+
