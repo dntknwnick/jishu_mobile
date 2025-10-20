@@ -13,14 +13,17 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useAuth } from '../../context/AuthContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
 };
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
+  const { loginWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleSendOTP = async () => {
     if (!email) {
@@ -59,6 +62,21 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
+    try {
+      await loginWithGoogle();
+      console.log('✅ Google login successful');
+      // Navigation will be handled by the auth state change
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Google login failed';
+      console.error('❌ Google login error:', errorMessage);
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -83,7 +101,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email Address</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="mail-outline" size={20} color="#9ca3af" />
+              <Icon name="mail" size={20} color="#9ca3af" />
               <TextInput
                 style={styles.input}
                 placeholder="Enter your email"
@@ -115,9 +133,15 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           </View>
 
           {/* Google Sign In */}
-          <TouchableOpacity style={styles.googleButton}>
-            <Icon name="logo-google" size={20} color="#6366f1" />
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
+          <TouchableOpacity
+            style={[styles.googleButton, isGoogleLoading && styles.googleButtonDisabled]}
+            onPress={handleGoogleLogin}
+            disabled={isGoogleLoading}
+          >
+            <Text style={styles.googleIconText}>G</Text>
+            <Text style={styles.googleButtonText}>
+              {isGoogleLoading ? 'Signing in...' : 'Continue with Google'}
+            </Text>
           </TouchableOpacity>
 
           {/* Sign Up Link */}
@@ -246,10 +270,18 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#e5e7eb',
   },
+  googleButtonDisabled: {
+    opacity: 0.6,
+  },
   googleButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#1f2937',
+  },
+  googleIconText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4285f4',
   },
   signupContainer: {
     flexDirection: 'row',

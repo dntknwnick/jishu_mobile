@@ -76,7 +76,7 @@ const HomeScreen = () => {
     { label: 'Start Test', icon: 'play-circle', color: '#6366f1', screen: 'Tests' },
     { label: 'My Courses', icon: 'book', color: '#10b981', screen: 'Courses' },
     { label: 'Community', icon: 'people', color: '#f59e0b', screen: 'Community' },
-    { label: 'AI Chatbot', icon: 'chatbubbles', color: '#8b5cf6', screen: 'Chatbot' },
+    { label: 'AI Chatbot', icon: 'chatbubble', color: '#8b5cf6', screen: 'Chatbot' },
   ];
 
   if (isLoading) {

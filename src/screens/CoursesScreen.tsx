@@ -8,10 +8,14 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  Dimensions,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { coursesApi, Course } from '../services/apiEndpoints';
+
+const { width } = Dimensions.get('window');
 
 const CoursesScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,6 +54,20 @@ const CoursesScreen = () => {
   const filteredCourses = courses.filter(course =>
     course.course_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const getCourseIcon = (courseName: string) => {
+    const name = courseName.toLowerCase();
+    if (name.includes('jee') || name.includes('advance')) {
+      return { icon: 'book-open-variant', color: '#3b82f6' };
+    } else if (name.includes('neet')) {
+      return { icon: 'hospital-box', color: '#ec4899' };
+    } else if (name.includes('cet')) {
+      return { icon: 'school', color: '#f59e0b' };
+    } else if (name.includes('mains')) {
+      return { icon: 'pencil', color: '#8b5cf6' };
+    }
+    return { icon: 'book-multiple', color: '#6366f1' };
+  };
 
   if (isLoading) {
     return (
@@ -91,41 +109,44 @@ const CoursesScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Available Courses</Text>
           {filteredCourses.length > 0 ? (
-            filteredCourses.map((course) => (
-              <TouchableOpacity key={course.id} style={styles.courseCard}>
-                <View style={styles.courseHeader}>
-                  <View style={styles.courseIcon}>
-                    <Text style={styles.courseEmoji}>📚</Text>
+            filteredCourses.map((course) => {
+              const { icon, color } = getCourseIcon(course.course_name);
+              return (
+                <TouchableOpacity key={course.id} style={styles.courseCard}>
+                  <View style={styles.courseHeader}>
+                    <View style={[styles.courseIcon, { backgroundColor: `${color}15` }]}>
+                      <MaterialCommunityIcons name={icon} size={32} color={color} />
+                    </View>
+                    <View style={styles.courseInfo}>
+                      <Text style={styles.courseName}>{course.course_name}</Text>
+                      <Text style={styles.courseSubjects}>
+                        {course.subjects?.length || 0} subjects
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={24} color="#9ca3af" />
                   </View>
-                  <View style={styles.courseInfo}>
-                    <Text style={styles.courseName}>{course.course_name}</Text>
-                    <Text style={styles.courseSubjects}>
-                      {course.subjects?.length || 0} subjects
-                    </Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={24} color="#9ca3af" />
-                </View>
 
-                {/* Course Details */}
-                <View style={styles.courseDetails}>
-                  {course.amount && (
-                    <View style={styles.priceSection}>
-                      <Text style={styles.priceLabel}>Price:</Text>
-                      <Text style={styles.price}>₹{course.amount}</Text>
-                      {course.offer_amount && (
-                        <Text style={styles.offerPrice}>₹{course.offer_amount}</Text>
-                      )}
-                    </View>
-                  )}
-                  {course.max_tokens && (
-                    <View style={styles.tokenSection}>
-                      <Ionicons name="flash" size={16} color="#f59e0b" />
-                      <Text style={styles.tokenText}>{course.max_tokens} tokens</Text>
-                    </View>
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))
+                  {/* Course Details */}
+                  <View style={styles.courseDetails}>
+                    {course.amount && (
+                      <View style={styles.priceSection}>
+                        <Text style={styles.priceLabel}>Price:</Text>
+                        <Text style={styles.price}>₹{course.amount}</Text>
+                        {course.offer_amount && (
+                          <Text style={styles.offerPrice}>₹{course.offer_amount}</Text>
+                        )}
+                      </View>
+                    )}
+                    {course.max_tokens && (
+                      <View style={styles.tokenSection}>
+                        <Ionicons name="flash" size={16} color="#f59e0b" />
+                        <Text style={styles.tokenText}>{course.max_tokens} tokens</Text>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })
           ) : (
             <View style={styles.emptyState}>
               <Ionicons name="search" size={48} color="#d1d5db" />
@@ -217,16 +238,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   courseIcon: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     backgroundColor: '#f3f4f6',
-    borderRadius: 12,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
-  },
-  courseEmoji: {
-    fontSize: 28,
   },
   courseInfo: {
     flex: 1,

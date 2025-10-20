@@ -29,32 +29,32 @@ const CustomDrawerContent = (props: any) => {
       onPress: () => handleNavigation('Profile'),
     },
     {
-      icon: 'person-outline',
+      icon: 'person',
       label: 'Edit Profile',
       onPress: () => handleNavigation('EditProfile'),
     },
     {
-      icon: 'settings-outline',
+      icon: 'settings',
       label: 'Account Settings',
       onPress: () => handleNavigation('AccountSettings'),
     },
     {
-      icon: 'notifications-outline',
+      icon: 'notifications',
       label: 'Notifications',
       onPress: () => handleNavigation('Notifications'),
     },
     {
-      icon: 'bookmark-outline',
+      icon: 'bookmark',
       label: 'Bookmarks',
       onPress: () => handleNavigation('Bookmarks'),
     },
     {
-      icon: 'help-circle-outline',
+      icon: 'help-circle',
       label: 'Help & Support',
       onPress: () => handleNavigation('Help'),
     },
     {
-      icon: 'information-circle-outline',
+      icon: 'information-circle',
       label: 'About',
       onPress: () => handleNavigation('About'),
     },
@@ -121,7 +121,7 @@ const CustomDrawerContent = (props: any) => {
             navigation.dispatch(DrawerActions.closeDrawer());
           }}
         >
-          <Icon name="log-out-outline" size={24} color="#ef4444" />
+          <Icon name="log-out" size={24} color="#ef4444" />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>

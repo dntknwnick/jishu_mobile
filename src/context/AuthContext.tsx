@@ -1,6 +1,9 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authApi, User, ApiError } from '../services/apiEndpoints';
+import { useDispatch, useSelector } from 'react-redux';
+import type { User } from '../services/apiEndpoints';
+import { login as reduxLogin, register as reduxRegister, logout as reduxLogout, loginWithGoogle as reduxLoginWithGoogle } from '../store/slices/authSlice';
+import type { AppDispatch, RootState } from '../store';
 
 interface AuthContextType {
   user: User | null;
@@ -9,6 +12,7 @@ interface AuthContextType {
   login: (email: string, otp: string) => Promise<void>;
   register: (data: { email: string; name: string; phone: string; otp: string }) => Promise<void>;
   logout: () => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
   clearError: () => void;
 }
@@ -20,6 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   register: async () => {},
   logout: async () => {},
+  loginWithGoogle: async () => {},
   updateUser: () => {},
   clearError: () => {},
 });
@@ -27,139 +32,81 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      const token = await AsyncStorage.getItem('access_token');
-      const userData = await AsyncStorage.getItem('jishu_user');
-
-      if (token && userData) {
-        try {
-          setUser(JSON.parse(userData));
-        } catch (parseError) {
-          console.error('Error parsing user data:', parseError);
-          await AsyncStorage.removeItem('jishu_user');
-        }
-      }
-    } catch (error) {
-      console.error('❌ Error checking auth status:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, isLoading, error } = useSelector((state: RootState) => state.auth);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const login = async (email: string, otp: string) => {
     try {
-      setError(null);
+      setLocalError(null);
       console.log('🔐 Attempting login with email:', email);
 
-      const response = await authApi.login(email, otp);
-
-      if (response.success && response.data) {
-        const { access_token, refresh_token, user: userData } = response.data;
-
-        // Save tokens
-        await AsyncStorage.setItem('access_token', access_token);
-        await AsyncStorage.setItem('refresh_token', refresh_token);
-        await AsyncStorage.setItem('jishu_user', JSON.stringify(userData));
-
-        setUser(userData);
-        console.log('✅ Login successful');
-      } else {
-        throw new Error(response.message || 'Login failed');
-      }
-    } catch (error) {
-      const errorMessage = error instanceof ApiError
-        ? error.message
-        : error instanceof Error
-        ? error.message
-        : 'Login failed. Please try again.';
-
+      await dispatch(reduxLogin({ email, otp })).unwrap();
+      console.log('✅ Login successful');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
       console.error('❌ Login error:', errorMessage);
-      setError(errorMessage);
-      throw error;
+      setLocalError(errorMessage);
+      throw err;
     }
   };
 
   const register = async (data: { email: string; name: string; phone: string; otp: string }) => {
     try {
-      setError(null);
+      setLocalError(null);
       console.log('📝 Attempting registration with email:', data.email);
 
-      const response = await authApi.register({
+      await dispatch(reduxRegister({
         email: data.email,
         name: data.name,
         mobile_no: data.phone,
         otp: data.otp,
-      });
+      })).unwrap();
 
-      if (response.success && response.data) {
-        const { access_token, refresh_token, user: userData } = response.data;
-
-        // Save tokens
-        await AsyncStorage.setItem('access_token', access_token);
-        await AsyncStorage.setItem('refresh_token', refresh_token);
-        await AsyncStorage.setItem('jishu_user', JSON.stringify(userData));
-
-        setUser(userData);
-        console.log('✅ Registration successful');
-      } else {
-        throw new Error(response.message || 'Registration failed');
-      }
-    } catch (error) {
-      const errorMessage = error instanceof ApiError
-        ? error.message
-        : error instanceof Error
-        ? error.message
-        : 'Registration failed. Please try again.';
-
+      console.log('✅ Registration successful');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed. Please try again.';
       console.error('❌ Registration error:', errorMessage);
-      setError(errorMessage);
-      throw error;
+      setLocalError(errorMessage);
+      throw err;
     }
   };
 
   const logout = async () => {
     try {
       console.log('🚪 Logging out...');
-
-      // Call logout API
-      try {
-        await authApi.logout();
-      } catch (apiError) {
-        console.warn('⚠️ Logout API call failed, clearing local data anyway:', apiError);
-      }
-
-      // Clear local storage
-      await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'jishu_user']);
-      setUser(null);
-      setError(null);
+      await dispatch(reduxLogout()).unwrap();
       console.log('✅ Logout successful');
     } catch (error) {
       console.error('❌ Logout error:', error);
       // Still clear local data even if API call fails
       await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'jishu_user']);
-      setUser(null);
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      setLocalError(null);
+      console.log('🔐 Attempting Google login...');
+      await dispatch(reduxLoginWithGoogle()).unwrap();
+      console.log('✅ Google login successful');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Google login failed. Please try again.';
+      console.error('❌ Google login error:', errorMessage);
+      setLocalError(errorMessage);
+      throw err;
     }
   };
 
   const updateUser = (userData: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
       AsyncStorage.setItem('jishu_user', JSON.stringify(updatedUser));
     }
   };
 
   const clearError = () => {
-    setError(null);
+    setLocalError(null);
   };
 
   return (
@@ -167,10 +114,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         isLoading,
-        error,
+        error: error || localError,
         login,
         register,
         logout,
+        loginWithGoogle,
         updateUser,
         clearError,
       }}

@@ -79,31 +79,31 @@ const ProfileScreen = () => {
 
   const menuItems = [
     {
-      icon: 'person-outline',
+      icon: 'person',
       label: 'Edit Profile',
       color: '#6366f1',
       onPress: () => Alert.alert('Coming Soon', 'Edit profile feature coming soon'),
     },
     {
-      icon: 'book-outline',
+      icon: 'book',
       label: 'My Courses',
       color: '#10b981',
       onPress: () => Alert.alert('Coming Soon', 'My courses feature coming soon'),
     },
     {
-      icon: 'bookmark-outline',
+      icon: 'bookmark',
       label: 'Bookmarks',
       color: '#f59e0b',
       onPress: () => Alert.alert('Coming Soon', 'Bookmarks feature coming soon'),
     },
     {
-      icon: 'settings-outline',
+      icon: 'settings',
       label: 'Settings',
       color: '#8b5cf6',
       onPress: () => Alert.alert('Coming Soon', 'Settings feature coming soon'),
     },
     {
-      icon: 'log-out-outline',
+      icon: 'log-out',
       label: 'Logout',
       color: '#ef4444',
       onPress: handleLogout,
@@ -153,7 +153,7 @@ const ProfileScreen = () => {
 
         {/* Edit Profile Button */}
         <TouchableOpacity style={styles.editProfileButton}>
-          <Icon name="create-outline" size={18} color="#6366f1" />
+          <Icon name="create" size={18} color="#6366f1" />
           <Text style={styles.editProfileText}>Edit Profile</Text>
         </TouchableOpacity>
       </LinearGradient>

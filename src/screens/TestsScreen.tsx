@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { testApi } from '../services/apiEndpoints';
+import { diagnoseNetwork } from '../services/networkDiagnostics';
 
 const TestsScreen = () => {
   const [activeTab, setActiveTab] = useState<'available' | 'completed'>('available');
@@ -30,16 +31,40 @@ const TestsScreen = () => {
       const response = await testApi.getTestCards();
 
       if (response.success && response.data?.test_cards_by_subject) {
-        console.log('✅ Test cards fetched');
+        console.log('✅ Test cards fetched:', response.data.test_cards_by_subject.length, 'subjects');
         setTestCards(response.data.test_cards_by_subject);
       } else {
-        throw new Error(response.message || 'Failed to fetch test cards');
+        const errorMsg = response.message || 'Failed to fetch test cards';
+        console.warn('⚠️ API returned non-success response:', response);
+        throw new Error(errorMsg);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load tests';
-      console.error('❌ Error fetching test cards:', errorMessage);
+      let errorMessage = 'Failed to load tests';
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'object' && err !== null && 'message' in err) {
+        errorMessage = (err as any).message;
+      }
+
+      console.error('❌ Error fetching test cards:', {
+        error: errorMessage,
+        fullError: err,
+      });
+
+      // Run network diagnostics to help debug
+      console.log('🔍 Running network diagnostics...');
+      const diagnostic = await diagnoseNetwork();
+      console.log('📊 Diagnostic result:', diagnostic);
+
       setError(errorMessage);
-      Alert.alert('Error', errorMessage);
+
+      // Show detailed error message
+      const detailedMessage = diagnostic.success
+        ? errorMessage
+        : `${errorMessage}\n\n${diagnostic.message}`;
+
+      Alert.alert('Error Loading Tests', detailedMessage);
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +91,7 @@ const TestsScreen = () => {
     if (testCards.length === 0) {
       return (
         <View style={styles.emptyState}>
-          <Ionicons name="document-outline" size={48} color="#d1d5db" />
+          <Ionicons name="document" size={48} color="#d1d5db" />
           <Text style={styles.emptyStateText}>No tests available</Text>
           <Text style={styles.emptyStateSubtext}>Purchase a course to access tests</Text>
         </View>

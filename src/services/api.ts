@@ -1,11 +1,12 @@
-import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../config/environment';
 
 // ============================================================================
 // API Configuration & Constants
 // ============================================================================
 
-const API_BASE_URL = 'http://localhost:5000'; // Change for production
+// API_BASE_URL is imported from environment configuration
 
 // API Error class for consistent error handling
 export class ApiError extends Error {
@@ -173,8 +174,52 @@ api.interceptors.response.use(
       );
     }
 
-    throw new ApiError(0, 'Network error or server unavailable');
+    // Provide more detailed error information
+    let errorMessage = 'Network error or server unavailable';
+    if (error.code === 'ECONNABORTED') {
+      errorMessage = 'Request timeout - server took too long to respond';
+    } else if (error.code === 'ENOTFOUND') {
+      errorMessage = `Cannot reach server at ${API_BASE_URL}`;
+    } else if (error.code === 'ECONNREFUSED') {
+      errorMessage = `Connection refused - server may not be running at ${API_BASE_URL}`;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    console.error('🔴 API Error Details:', {
+      code: error.code,
+      message: error.message,
+      url: error.config?.url,
+      baseURL: API_BASE_URL,
+      method: error.config?.method,
+    });
+
+    throw new ApiError(0, errorMessage);
   }
 );
+
+// ============================================================================
+// Re-export types and APIs from apiEndpoints for Redux slices
+// ============================================================================
+
+export {
+  authApi,
+  coursesApi,
+  subjectsApi,
+  profileApi,
+  purchaseApi,
+  testApi,
+  mcqApi,
+  chatbotApi,
+  communityApi,
+  questionsApi,
+  adminApi,
+  type User,
+  type Course,
+  type Subject,
+  type ApiResponse,
+  type BlogPost,
+  type Question,
+} from './apiEndpoints';
 
 export default api;

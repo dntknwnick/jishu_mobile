@@ -92,7 +92,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Full Name</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="person-outline" size={20} color="#9ca3af" />
+              <Icon name="person" size={20} color="#9ca3af" />
               <TextInput
                 style={styles.input}
                 placeholder="Enter your name"
@@ -108,7 +108,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email Address</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="mail-outline" size={20} color="#9ca3af" />
+              <Icon name="mail" size={20} color="#9ca3af" />
               <TextInput
                 style={styles.input}
                 placeholder="Enter your email"
@@ -125,7 +125,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Phone Number</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="call-outline" size={20} color="#9ca3af" />
+              <Icon name="call" size={20} color="#9ca3af" />
               <TextInput
                 style={styles.input}
                 placeholder="+91 1234567890"
